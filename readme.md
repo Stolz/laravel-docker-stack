@@ -52,6 +52,7 @@ To use Postgres database with the default user set these values ...
 
 	DB_CONNECTION=pgsql
 	DB_HOST=postgres
+	DB_PORT=5432
 	DB_DATABASE=postgres
 	DB_USERNAME=postgres
 	DB_PASSWORD=secret
