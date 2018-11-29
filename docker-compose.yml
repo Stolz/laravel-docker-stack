@@ -24,15 +24,20 @@ services:
       - ./laravel:/www
 
   db:
-    container_name: postgres
-    image: postgres:alpine
+    container_name: oracle
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secret
+      - DB_SID=ORACLE
+      - DB_PDB=DATABASE
+      - DB_MEMORY=2GB
+      - DB_DOMAIN=DOCKER
+    image: container-registry.oracle.com/database/enterprise:12.2.0.1-slim
+    #ports:
+      #- "1521:1521"
+      #- "5500:5500"
     restart: unless-stopped
+    stop_grace_period: 40s
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./oracle:/ORCL
 
   cache:
     container_name: redis

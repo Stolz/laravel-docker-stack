@@ -8,12 +8,13 @@ The stack is created using [Docker Compose](https://docs.docker.com/compose/) an
 
 - [Nginx](https://nginx.org/en/) HTTP server.
 - [PHP FPM](https://php-fpm.org) FastCGI process manager.
-- [PostgreSQL](https://www.postgresql.org) relational database.
+- [Oracle](https://www.oracle.com/database/) relational database.
 - [Redis](https://redis.io) in-memory cache and message broker.
 
 ## Features
 
-- Containers are based on [Alpine Linux](https://alpinelinux.org) which makes them slim and fast.
+- Containers (except database) are based on [Alpine Linux](https://alpinelinux.org) which makes them slim and fast.
+- Database container based on the slim version of Oracle enterprise.
 - Source code and configuration files are mounted via Docker volumes so changes are reflected immediately, without having to rebuild the containers.
 - Database persisted data is also mounted via Docker volume so changes are not lost after rebuilding the containers.
 - Dependencies are managed using [PHP Composer](https://getcomposer.org) official Docker image to keep all the tools inside Docker land.
@@ -23,14 +24,24 @@ The stack is created using [Docker Compose](https://docs.docker.com/compose/) an
 
 - [Git](https://git-scm.com).
 - [Docker](https://www.docker.com) and [Docker Compose](https://docs.docker.com/compose/).
-
-To prevent permission problems ensure all files and directories are owned by user:group `1000:1000`.
+- [Oracle Instant Client](https://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html) installation files (.zip).
+- A valid [Oracle Xontainer Registry](https://container-registry.oracle.com) account. You will need to accept the license available at `Database > enterprise` section.
 
 ## Installation
 
+[Download Oracle Instant Client](https://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html) ZIP files (basic + sdk) and place then inside `php/instantclient/` folder.
+
+Log into your Oracle Container Registry account
+
+	docker login -u your@email.com container-registry.oracle.com
+
 Get the application skeleton
 
-	git clone git@github.com:Stolz/laravel-docker-stack.git my-laravel-project && cd my-laravel-project
+	git clone git@github.com:Stolz/laravel-docker-stack.git -b oracle my-laravel-project && cd my-laravel-project
+
+Get glibc compatibility layer package for Alpine Linux
+
+	wget -P php/instantclient/glibc/ https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk
 
 Install your Laravel flavor
 
@@ -48,15 +59,23 @@ Configure environment following [standard Laravel instructions](https://laravel.
 	cp laravel/.env.example laravel/.env
 	$EDITOR laravel/.env
 
-To use Postgres database with the default user set these values ...
+Create a database schema ...
 
-	DB_CONNECTION=pgsql
-	DB_HOST=postgres
-	DB_DATABASE=postgres
-	DB_USERNAME=postgres
-	DB_PASSWORD=secret
+	docker exec -it oracle bash
+	source /home/oracle/.bashrc
+	alter session set container = database;
+	create user <user> identified by <password> container = current;
+	grant connect, resource, create any context to <user>;
+	alter user <user> quota unlimited on users;
 
-... but since `postgres` is a privileged account you should consider creating a dedicated user instead. If you do so, don't forget to also update the service configuration in `docker-compose.yml` file.
+... and then you can use these values
+
+	DB_CONNECTION=oracle
+	DB_HOST=oracle
+	DB_PORT=1521
+	DB_SERVICE=DATABASE.DOCKER
+	DB_USERNAME=<user>
+	DB_PASSWORD=<password>
 
 To use Redis, first you need to install [Predis](https://github.com/nrk/predis) client ...
 

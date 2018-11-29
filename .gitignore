@@ -4,4 +4,5 @@
 .*~
 /composer
 /laravel
-/postgres
+/oracle
+/php/instantclient
