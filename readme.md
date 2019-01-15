@@ -7,7 +7,7 @@ Skeleton for creating a multi-container [Docker](https://www.docker.com) applica
 The stack is created using [Docker Compose](https://docs.docker.com/compose/) and consist of the following services:
 
 - [Nginx](https://nginx.org/en/) HTTP server.
-- [PHP FPM](https://php-fpm.org) FastCGI process manager.
+- [PHP-FPM](https://php-fpm.org) FastCGI process manager.
 - [PostgreSQL](https://www.postgresql.org) relational database.
 - [Redis](https://redis.io) in-memory cache and message broker.
 
@@ -18,6 +18,8 @@ The stack is created using [Docker Compose](https://docs.docker.com/compose/) an
 - Database persisted data is also mounted via Docker volume so changes are not lost after rebuilding the containers.
 - Dependencies are managed using [PHP Composer](https://getcomposer.org) official Docker image to keep all the tools inside Docker land.
 - All services are run by UID:GID `1000:1000` to prevent permission problems.
+- All services are run by UID:GID `1000:1000` to prevent permission problems.
+- Communication between Nginx and PHP-FPM using UNIX sockets instead of TCP for better performance.
 
 ## Requirement
 

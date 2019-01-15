@@ -8,9 +8,10 @@ services:
     image: custom/php
     restart: unless-stopped
     volumes:
-      - ./php/config:/usr/local/etc:ro
-      - ./php/supervisord.conf:/etc/supervisord.conf:ro
       - ./laravel:/www
+      - ./php/config:/usr/local/etc:ro
+      - ./php/socket:/var/run/php
+      - ./php/supervisord.conf:/etc/supervisord.conf:ro
 
   web:
     build: ./nginx
@@ -20,8 +21,9 @@ services:
       - "80:80"
     restart: unless-stopped
     volumes:
-      - ./nginx/config:/etc/nginx:ro
       - ./laravel:/www
+      - ./nginx/config:/etc/nginx:ro
+      - ./php/socket:/var/run/php
 
   db:
     container_name: postgres
