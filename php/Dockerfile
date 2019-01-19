@@ -1,7 +1,19 @@
 FROM php:fpm-alpine
 
-# Install Postgres PHP extension
-RUN apk --no-cache add postgresql-dev && docker-php-ext-install pdo_pgsql
+ENV REDIS_VERSION 4.0.2
+
+# Install Postgres PHP extension dependencies
+RUN apk --no-cache add postgresql-dev
+
+# Install Redis PHP extension dependencies
+RUN curl -L -o redis.tar.gz https://github.com/phpredis/phpredis/archive/$REDIS_VERSION.tar.gz && \
+tar xfz redis.tar.gz && \
+rm -r redis.tar.gz && \
+mkdir -p /usr/src/php/ext && \
+mv phpredis-* /usr/src/php/ext/redis
+
+# Enable Postgres and Redis PHP extensions
+RUN docker-php-ext-install pdo_pgsql redis
 
 # Install Supervisor
 RUN apk --no-cache add supervisor && mkdir /etc/supervisor.d

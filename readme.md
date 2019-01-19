@@ -14,12 +14,13 @@ The stack is created using [Docker Compose](https://docs.docker.com/compose/) an
 ## Features
 
 - Containers are based on [Alpine Linux](https://alpinelinux.org) which makes them slim and fast.
-- Source code and configuration files are mounted via Docker volumes so changes are reflected immediately, without having to rebuild the containers.
+- Source code and server configuration files are mounted via Docker volumes so changes are reflected immediately, without having to rebuild the containers.
 - Database persisted data is also mounted via Docker volume so changes are not lost after rebuilding the containers.
 - Dependencies are managed using [PHP Composer](https://getcomposer.org) official Docker image to keep all the tools inside Docker land.
-- All services are run by UID:GID `1000:1000` to prevent permission problems.
-- All services are run by UID:GID `1000:1000` to prevent permission problems.
+- All services are run by the same UID:GID (`1000:1000`) to prevent permission problems between containers.
 - Communication between Nginx and PHP-FPM using UNIX sockets instead of TCP for better performance.
+- Communication between Redis and PHP using [PhpRedis](https://github.com/phpredis/phpredis) PHP extension for better performance.
+- [Supervisor](http://supervisord.org) is used to automatically run Laravel queue workers.
 
 ## Requirement
 
@@ -61,17 +62,18 @@ To use Postgres database with the default user set these values ...
 
 ... but since `postgres` is a privileged account you should consider creating a dedicated user instead. If you do so, don't forget to also update the service configuration in `docker-compose.yml` file.
 
-To use Redis, first you need to install [Predis](https://github.com/nrk/predis) client ...
+To use Redis, first you need to edit `config/database.php` file to use [PhpRedis](https://github.com/phpredis/phpredis) client ...
 
-	docker run --rm -it --user 1000:1000 -v $(pwd)/laravel:/app -v $(pwd)/composer:/tmp composer require predis/predis
+	'client' => env('REDIS_CLIENT', 'phpredis'),
 
-... and then you can use these values
+... and then you can use these values in your `.env` file
 
 	BROADCAST_DRIVER=redis
 	CACHE_DRIVER=redis
 	QUEUE_CONNECTION=redis
-	SESSION_DRIVER=redis
+	REDIS_CLIENT=phpredis
 	REDIS_HOST=redis
+	SESSION_DRIVER=redis
 
 ## Artisan
 
