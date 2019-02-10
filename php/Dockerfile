@@ -12,8 +12,8 @@ rm -r redis.tar.gz && \
 mkdir -p /usr/src/php/ext && \
 mv phpredis-* /usr/src/php/ext/redis
 
-# Enable Postgres and Redis PHP extensions
-RUN docker-php-ext-install pdo_pgsql redis
+# Install Postgres and Redis PHP extensions
+RUN docker-php-ext-install pdo_pgsql redis && docker-php-source delete
 
 # Install Supervisor
 RUN apk --no-cache add supervisor && mkdir /etc/supervisor.d
